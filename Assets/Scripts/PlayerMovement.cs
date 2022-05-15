@@ -5,11 +5,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float speed;
     [SerializeField] private float jumpPower;
     [SerializeField]private LayerMask groundLayer;
-    [SerializeField] private LayerMask wallLayer;
+    [SerializeField]private LayerMask wallLayer;
     private Rigidbody2D body;
     private Animator anim;
     private BoxCollider2D boxCollider;
     private float wallJumpCooldown;
+    private float horizontalInput;
 
     private void Awake()
     {
@@ -21,7 +22,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
+        horizontalInput = Input.GetAxis("Horizontal");
 
 
         if(horizontalInput > 0.01f)
@@ -44,7 +45,6 @@ public class PlayerMovement : MonoBehaviour
         //Wall jump logic
         if (wallJumpCooldown > 0.2f)
         {
-
             body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
 
             if (onWall() && !isGrounded())
@@ -61,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
         else
-            wallJumpCooldown = Time.deltaTime;
+            wallJumpCooldown += Time.deltaTime;
     }
 
     private void Jump()
@@ -73,11 +73,17 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (onWall() && !isGrounded())
         {
+            if(horizontalInput == 0)
+            {
+                body.velocity = new Vector2(-Mathf.Sign(transform.localScale.x) * 10, 0);
+                transform.localScale = new Vector3(-Mathf.Sign(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            }
+            else
+                body.velocity = new Vector2(-Mathf.Sign(transform.localScale.x) * 3, 6);
+
             wallJumpCooldown = 0;
-            body.velocity = new Vector2(-Mathf.Sign(transform.localScale.x) * 1, 2);
+            
         }
-
-
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
